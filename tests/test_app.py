@@ -1,5 +1,7 @@
 from http import HTTPStatus
 
+from fast_zero.schemas import UserPublic
+
 
 def test_read_root_retorna_ok_e_hello_world(client):
     response = client.get('/')
@@ -28,13 +30,25 @@ def test_create_user(client):
 
 def test_read_users(client):
     response = client.get('/users/')
+
+    assert response.status_code == HTTPStatus.OK
+    assert response.json() == {'users': []}
+
+
+def test_read_users_with_user(client, user):
+    user_schema = UserPublic.model_validate(user).model_dump()
+
+    response = client.get('/users/')
+
     assert response.status_code == HTTPStatus.OK
     assert response.json() == {
-        'users': [{'username': 'alice', 'email': 'alice@example.com', 'id': 1}]
+        'users': [
+            user_schema  # UserPublic
+        ]
     }
 
 
-def test_update_user(client):
+def test_update_user(client, user):
     response = client.put(
         '/users/1',
         json={
@@ -52,7 +66,7 @@ def test_update_user(client):
     }
 
 
-def test_delete_user(client):
+def test_delete_user(client, user):
     response = client.delete('/users/1')
 
     assert response.status_code == HTTPStatus.OK
