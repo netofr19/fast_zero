@@ -28,6 +28,32 @@ def test_create_user(client):
     }
 
 
+def test_create_user_that_exists_username(client, user):
+    response = client.post(
+        '/users/',
+        json={
+            'username': 'Teste',
+            'email': 'teste1@teste.com',
+            'password': 'testtest',
+        },
+    )
+
+    assert response.status_code == HTTPStatus.BAD_REQUEST
+
+
+def test_create_user_that_exists_email(client, user):
+    response = client.post(
+        '/users/',
+        json={
+            'username': 'Teste1',
+            'email': 'teste@teste.com',
+            'password': 'testtest',
+        },
+    )
+
+    assert response.status_code == HTTPStatus.BAD_REQUEST
+
+
 def test_read_users(client):
     response = client.get('/users/')
 
@@ -66,8 +92,27 @@ def test_update_user(client, user):
     }
 
 
+def test_update_user_that_dont_exists(client, user):
+    response = client.put(
+        '/users/99',
+        json={
+            'username': 'bob',
+            'email': 'bob@example.com',
+            'password': 'mynewpassword',
+        },
+    )
+
+    assert response.status_code == HTTPStatus.NOT_FOUND
+
+
 def test_delete_user(client, user):
     response = client.delete('/users/1')
 
     assert response.status_code == HTTPStatus.OK
     assert response.json() == {'message': 'User Deleted'}
+
+
+def test_delete_user_that_dont_exists(client, user):
+    response = client.delete('/users/99')
+
+    assert response.status_code == HTTPStatus.NOT_FOUND

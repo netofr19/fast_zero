@@ -51,7 +51,7 @@ def create_user(user: UserSchema, session=Depends(get_session)):
 def read_users(
     limit: int = 10, offset: int = 0, session: Session = Depends(get_session)
 ):
-    user = session.scalars(select(User).limit(limit).offset(offset))
+    user = session.scalars(select(User).limit(limit).offset(offset)).all()
     return {'users': user}
 
 
