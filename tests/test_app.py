@@ -74,13 +74,15 @@ def test_read_users_with_user(client, user):
     }
 
 
-def test_update_user(client, user):
+def test_update_user(client, user, token):
     response = client.put(
-        '/users/1',
+        f'/users/{user.id}',
+        headers={'Authorization': f'Bearer {token}'},
         json={
             'username': 'bob',
             'email': 'bob@example.com',
             'password': 'mynewpassword',
+            'id': user.id
         },
     )
 
@@ -88,13 +90,14 @@ def test_update_user(client, user):
     assert response.json() == {
         'username': 'bob',
         'email': 'bob@example.com',
-        'id': 1,
+        'id': user.id,
     }
 
 
-def test_update_user_that_dont_exists(client, user):
+def test_update_user_that_dont_exists(client, user, token):
     response = client.put(
         '/users/99',
+        headers={'Authorization': f'Bearer {token}'},
         json={
             'username': 'bob',
             'email': 'bob@example.com',
@@ -102,17 +105,23 @@ def test_update_user_that_dont_exists(client, user):
         },
     )
 
-    assert response.status_code == HTTPStatus.NOT_FOUND
+    assert response.status_code == HTTPStatus.BAD_REQUEST
 
 
-def test_delete_user(client, user):
-    response = client.delete('/users/1')
+def test_delete_user(client, user, token):
+    response = client.delete(
+        f'/users/{user.id}',
+        headers={'Authorization': f'Bearer {token}'},
+    )
 
     assert response.status_code == HTTPStatus.OK
     assert response.json() == {'message': 'User Deleted'}
 
 
-def test_delete_user_that_dont_exists(client, user):
-    response = client.delete('/users/99')
+def test_delete_user_that_dont_exists(client, user, token):
+    response = client.delete(
+        '/users/99',
+        headers={'Authorization': f'Bearer {token}'},
+    )
 
-    assert response.status_code == HTTPStatus.NOT_FOUND
+    assert response.status_code == HTTPStatus.BAD_REQUEST
